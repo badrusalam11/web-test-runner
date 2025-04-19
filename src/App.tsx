@@ -20,12 +20,14 @@ import {
   Paper,
   IconButton,
   useTheme,
+  LinearProgress,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import PendingIcon from '@mui/icons-material/Pending';
 import RunCircleIcon from '@mui/icons-material/RunCircle';
+import DownloadIcon from '@mui/icons-material/Download';
 import { api, Project, TestStatus } from './services/api';
 
 const darkTheme = createTheme({
@@ -107,7 +109,11 @@ function App() {
       setActiveTests(new Map(activeTests.set(result.running_id, {
         id_test: result.running_id,
         status: 1,
-        checkpoint: 0
+        checkpoint: 0,
+        progress: 0,
+        step_name: 'Initializing...',
+        total_steps: 0,
+        report_file: ''
       })));
       setError('');
     } catch (err) {
@@ -152,6 +158,10 @@ function App() {
       default:
         return 'Unknown';
     }
+  };
+
+  const handleDownloadReport = (reportFile: string) => {
+    window.open(reportFile, '_blank');
   };
 
   return (
@@ -238,21 +248,50 @@ function App() {
                   sx={{
                     p: 2,
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: 'column',
                     gap: 2,
                     bgcolor: 'background.paper',
                   }}
                 >
-                  {getStatusIcon(test.status)}
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="subtitle1">
-                      Test ID: {id}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Status: {getStatusText(test.status)}
-                    </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    {getStatusIcon(test.status)}
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography variant="subtitle1">
+                        Test ID: {id}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Status: {getStatusText(test.status)}
+                      </Typography>
+                      {test.step_name && (
+                        <Typography variant="body2" color="text.secondary">
+                          Step: {test.step_name} ({test.checkpoint}/{test.total_steps})
+                        </Typography>
+                      )}
+                    </Box>
+                    {test.status === 2 && <CircularProgress size={20} />}
+                    {test.report_file && (
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleDownloadReport(test.report_file)}
+                        sx={{
+                          bgcolor: 'primary.main',
+                          color: 'background.paper',
+                          '&:hover': {
+                            bgcolor: 'primary.dark',
+                          },
+                        }}
+                      >
+                        <DownloadIcon />
+                      </IconButton>
+                    )}
                   </Box>
-                  {test.status === 2 && <CircularProgress size={20} />}
+                  {test.status === 2 && (
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={test.progress || 0}
+                      sx={{ height: 8, borderRadius: 4 }}
+                    />
+                  )}
                 </Paper>
               ))}
             </Box>
