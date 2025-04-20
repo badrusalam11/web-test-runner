@@ -65,6 +65,8 @@ function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       activeTests.forEach((test, id) => {
+        console.log("test", test)
+        console.log("id", id)
         if (test.status < 3) {
           checkTestStatus(id);
         }
@@ -106,7 +108,7 @@ function App() {
 
     try {
       const result = await api.runTest(selectedTestSuite, selectedProject);
-      setActiveTests(new Map(activeTests.set(result.running_id, {
+      setActiveTests(new Map(activeTests.set(result.reference_number, {
         id_test: result.running_id,
         status: 1,
         checkpoint: 0,

@@ -14,6 +14,7 @@ export interface TestSuite {
 export interface TestRun {
   running_id: string;
   testsuite_id: string;
+  reference_number: string; // Reference number for checking status
 }
 
 export interface TestStatus {
@@ -47,9 +48,9 @@ export const api = {
     return response.data.data;
   },
 
-  checkStatus: async (id_test: string): Promise<TestStatus> => {
+  checkStatus: async (reference_number: string): Promise<TestStatus> => {
     const response = await axios.post(`${BASE_URL}/automation/check-status`, {
-      id_test
+      reference_number
     });
     return response.data.data;
   }
